@@ -1,16 +1,29 @@
-# jamb_try
+# JAMB CBT App
 
-A new Flutter project.
+The *JAMB CBT App* is a Flutter-based practice application designed to help
+students prepare for the Joint Admissions and Matriculation Board (JAMB)
+Computer-Based Test.
 
-## Getting Started
+## 🚀 Project Overview
 
-This project is a starting point for a Flutter application.
+This app provides:
+- Practice CBT-style questions
+- Timed tests and score tracking
+- A simple and user-friendly interface
+- Offline-friendly learning experience
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🛠️ Built With
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter (Dart)
+
+---
+
+## ▶️ Getting Started
+
+### Run the app locally
+
+```bash
+flutter pub get
+flutter run

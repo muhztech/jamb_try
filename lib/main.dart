@@ -14,10 +14,21 @@ class JambTryApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ExamController(),
-      child: MaterialApp(
+      create: (_) {
+        final controller = ExamController();
+
+        // Restore saved exam OR start new one
+        controller.restoreState().then((restored) {
+          if (!restored) {
+            controller.startTimer();
+          }
+        });
+
+        return controller;
+      },
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const CbtScreen(),
+        home: CbtScreen(),
       ),
     );
   }

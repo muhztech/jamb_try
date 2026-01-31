@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/exam_controller.dart';
+import 'cbt_screen.dart';
+import 'review_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});
@@ -11,50 +13,64 @@ class ResultScreen extends StatelessWidget {
     final controller = context.watch<ExamController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('UTME Result')),
+      appBar: AppBar(
+        title: const Text("UTME Result"),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _resultTile('Score', controller.score.toString()),
-            _resultTile('Correct', controller.correctCount.toString()),
-            _resultTile('Wrong', controller.wrongCount.toString()),
-            _resultTile('Time Used', controller.timeUsed),
+            const SizedBox(height: 10),
 
-            const Spacer(),
+            Text(
+              "Score: ${controller.score}",
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+
+            Text("Correct: ${controller.correctCount}"),
+            Text("Wrong: ${controller.wrongCount}"),
+            const SizedBox(height: 10),
+
+            Text("Time Used: ${controller.timeUsed}"),
+            const SizedBox(height: 20),
+
+            if (controller.wrongCount > 0)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    controller.startReview();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ReviewScreen()),
+                    );
+                  },
+                  child: const Text("Review Wrong Answers"),
+                ),
+              ),
+
+            const SizedBox(height: 12),
 
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: () {
+                  // ✅ FIX: reset + replace screen to prevent blank
                   controller.resetExam();
-                  Navigator.pop(context);
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CbtScreen()),
+                  );
                 },
-                child: const Text('Retake Exam'),
+                child: const Text("Retake Exam"),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _resultTile(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 18)),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }

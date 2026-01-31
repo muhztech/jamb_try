@@ -3,100 +3,186 @@ import 'package:provider/provider.dart';
 
 import '../services/exam_controller.dart';
 import 'explanation_screen.dart';
-import 'navigation_grid.dart';
 import 'result_screen.dart';
+import '../widgets/question_navigation_grid.dart';
+import '../widgets/utme_top_bar.dart';
 
-class CbtScreen extends StatelessWidget {
+class CbtScreen extends StatefulWidget {
   const CbtScreen({super.key});
 
   @override
+  State<CbtScreen> createState() => _CbtScreenState();
+}
+
+class _CbtScreenState extends State<CbtScreen> {
+  @override
   Widget build(BuildContext context) {
     final controller = context.watch<ExamController>();
-    final question = controller.currentQuestion;
 
+    // If exam already submitted
     if (controller.isSubmitted) {
       return const ResultScreen();
     }
 
+    final question = controller.currentQuestion;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('JAMB TRY – CBT'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(12),
-            child: TimerWidget(),
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Q${controller.currentIndex + 1}. ${question.question}',
-              style: const TextStyle(fontSize: 18),
-            ),
-          ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ✅ Official UTME Top Bar
+            const UtmeTopBar(),
 
-          ...List.generate(question.options.length, (index) {
-            return RadioListTile<int>(
-              title: Text(question.options[index]),
-              value: index,
-              groupValue: controller.selectedOption,
-              onChanged: (value) =>
-                  controller.selectOption(value!),
-            );
-          }),
+            // ✅ SUBJECT SWITCHER TABS
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              color: Colors.grey.shade200,
+              child: Row(
+                children: List.generate(controller.subjects.length, (index) {
+                  final subject = controller.subjects[index];
+                  final isSelected = index == controller.currentSubjectIndex;
 
-          const Spacer(),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: QuestionNavigationGrid(
-              current: controller.currentIndex,
-              total: controller.totalQuestions,
-              onTap: controller.jumpTo,
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: controller.selectedOption == null
-                    ? null
-                    : () {
-                        controller.submitAnswer();
-                        if (controller.selectedOption !=
-                            question.correctIndex) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ExplanationScreen(
-                                question: question,
-                              ),
-                            ),
-                          );
-                        }
-                        controller.nextQuestion();
-                      },
-                child: const Text('Next'),
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => controller.switchSubject(index),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.green : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          subject.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
               ),
             ),
-          ),
-        ],
+
+            // ✅ Question + Options Section
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Question ${controller.currentIndex + 1}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Text(
+                      question.question,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 15),
+
+                    ...List.generate(question.options.length, (index) {
+                      return Card(
+                        elevation: 0,
+                        color: Colors.grey.shade100,
+                        child: RadioListTile<int>(
+                          title: Text(question.options[index]),
+                          value: index,
+                          groupValue: controller.selectedOption,
+                          onChanged: (value) {
+                            if (value == null) return;
+                            controller.selectOption(value);
+                          },
+                        ),
+                      );
+                    }),
+
+                    const SizedBox(height: 20),
+
+                    // ✅ Question Navigation Grid
+                    QuestionNavigationGrid(
+                      current: controller.currentIndex,
+                      total: controller.totalQuestions,
+                      answeredMap: controller.answeredMap,
+                      onTap: controller.jumpTo,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ✅ Bottom Buttons
+            Container(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey.shade700,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: controller.currentIndex == 0
+                          ? null
+                          : () => controller.prevQuestion(),
+                      child: const Text("Previous"),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: controller.selectedOption == null
+                          ? null
+                          : () {
+                              // show explanation if wrong
+                              if (controller.selectedOption !=
+                                  question.correctIndex) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ExplanationScreen(question: question),
+                                  ),
+                                );
+                              }
+
+                              final isLast = controller.currentIndex ==
+                                  controller.totalQuestions - 1;
+
+                              if (isLast) {
+                                controller.submitExam();
+                              } else {
+                                controller.nextQuestion();
+                              }
+                            },
+                      child: Text(
+                        controller.currentIndex == controller.totalQuestions - 1
+                            ? "Submit"
+                            : "Next",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  }
-}
-
-class TimerWidget extends StatelessWidget {
-  const TimerWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = context.watch<ExamController>();
-    return Text(controller.formattedTime);
   }
 }

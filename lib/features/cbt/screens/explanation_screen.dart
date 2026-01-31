@@ -21,21 +21,36 @@ class ExplanationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Question text (optional, can also display above explanation)
+            Text(
+              question.question,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Explanation text
             Text(
               question.explanation,
               style: const TextStyle(fontSize: 16),
             ),
             const Spacer(),
+
+            // Continue button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  // Go to next question in controller
                   context.read<ExamController>().nextQuestion();
+                  // Close explanation screen
                   Navigator.pop(context);
                 },
                 child: const Text('Continue'),
               ),
-            )
+            ),
           ],
         ),
       ),

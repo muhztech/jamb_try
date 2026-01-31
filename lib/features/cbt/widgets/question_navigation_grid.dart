@@ -3,17 +3,15 @@ import 'package:flutter/material.dart';
 class QuestionNavigationGrid extends StatelessWidget {
   final int current;
   final int total;
-  final void Function(int) onTap;
-
-  /// Optional: tells if a question has been answered
-  final bool Function(int index)? isAnswered;
+  final Map<int, int?> answeredMap;
+  final Function(int) onTap;
 
   const QuestionNavigationGrid({
     super.key,
     required this.current,
     required this.total,
+    required this.answeredMap,
     required this.onTap,
-    this.isAnswered,
   });
 
   @override
@@ -28,14 +26,15 @@ class QuestionNavigationGrid extends StatelessWidget {
       ),
       itemCount: total,
       itemBuilder: (_, index) {
-        Color bgColor;
+        final isCurrent = index == current;
+        final isAnswered = answeredMap.containsKey(index);
 
-        if (index == current) {
-          bgColor = Colors.blue; // current question
-        } else if (isAnswered?.call(index) == true) {
-          bgColor = Colors.green; // answered
-        } else {
-          bgColor = Colors.grey.shade300; // unanswered
+        Color bgColor = Colors.grey.shade300;
+
+        if (isCurrent) {
+          bgColor = Colors.green;
+        } else if (isAnswered) {
+          bgColor = Colors.blue;
         }
 
         return GestureDetector(
@@ -48,13 +47,7 @@ class QuestionNavigationGrid extends StatelessWidget {
             ),
             child: Text(
               '${index + 1}',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: bgColor == Colors.grey.shade300
-                    ? Colors.black
-                    : Colors.white,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.white),
             ),
           ),
         );

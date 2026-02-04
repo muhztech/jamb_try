@@ -91,7 +91,9 @@ class ExamController extends ChangeNotifier {
   Future<void> loadOnlineQuestionsForCurrentSubject() async {
     try {
       final api = TriviaApiService();
-      final questions = await api.fetchQuestions();
+     final questions =
+    await api.fetchQuestions(currentSubject.id);
+
 
       currentSubject.questions
         ..clear()

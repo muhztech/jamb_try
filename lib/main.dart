@@ -17,12 +17,13 @@ class JambTryApp extends StatelessWidget {
       create: (_) {
         final controller = ExamController();
 
-        // Restore saved exam OR start new one
-        controller.restoreState().then((restored) {
-          if (!restored) {
-            controller.startTimer();
-          }
-        });
+        controller.restoreState().then((restored) async {
+  if (!restored) {
+    await controller.loadOnlineQuestionsForCurrentSubject();
+    controller.startTimer();
+  }
+});
+
 
         return controller;
       },

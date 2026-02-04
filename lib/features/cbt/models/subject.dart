@@ -10,4 +10,17 @@ class Subject {
     required this.name,
     required this.questions,
   });
+
+  /// ✅ ADD THIS METHOD
+  Subject copyWith({
+    String? id,
+    String? name,
+    List<Question>? questions,
+  }) {
+    return Subject(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      questions: questions ?? this.questions,
+    );
+  }
 }
